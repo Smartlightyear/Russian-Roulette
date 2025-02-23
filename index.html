@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Russian Roulette</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Nosifer&display=swap');
+        body { text-align: center; font-family: Arial, sans-serif; background-color: #222; color: white; }
+        button { font-size: 20px; padding: 10px; margin: 20px; background-color: red; color: white; border: none; cursor: pointer; }
+        button:disabled { background-color: grey; }
+        #game-container { display: block; margin-top: 20px; }
+        #gun { width: 200px; transition: transform 0.5s; transform: rotate(90deg); margin: 40px auto; display: block; }
+        #bullets { margin-top: 20px; }
+        .bullet { width: 30px; margin: 5px; }
+        #bot-container { margin-top: 40px; }
+        #bot { width: 100px; }
+        #chance-bar { width: 200px; height: 20px; background: grey; margin: 20px auto; position: relative; }
+        #chance-fill { height: 100%; width: 0%; background: red; }
+        h1 { font-family: 'Nosifer', sans-serif; }
+    </style>
+</head>
+<body>
+    <div id="game-container">
+        <h1>Russian Roulette</h1>
+        <p id="status">Spinning the gun to see who goes first...</p>
+        <div id="chance-bar"><div id="chance-fill"></div></div>
+        <div>
+            <img id="gun" src="https://purepng.com/public/uploads/large/purepng.com-rusty-revolver-renderedgunwesternmetaldanger-4015204577805v5pg.png" alt="Gun">
+        </div>
+        <button id="trigger-btn" onclick="playGame()" disabled>Pull Trigger</button>
+        <button onclick="resetGame()">Retry</button>
+        <button onclick="addBullet()">Add Bullet</button>
+        <div id="bot-container">
+            <img id="bot" src="https://tr.rbxcdn.com/30DAY-DynamicHeadCostume-B14CDBAEAE61FCECDA302821F7E661C9-Png/420/420/DynamicHeadCostume/Png/noFilter" alt="Bot">
+            <p id="bot-message"></p>
+        </div>
+        <div id="bullets"></div>
+    </div>
+    
+    <script>
+        let turn;
+        let chambers;
+        let botMessages = [
+            "Your move...", "Feeling lucky?", "I don't miss...", "Boom or click?", "Try your luck!", 
+            "Better luck next time!", "Was that your last game?", "Click... or bang?", 
+            "You should've thought twice...", "Looks like I'm still here!", "That was close!", 
+            "Why am I programmed to feel fear?", "This game is rigged, right?", "I bet my circuits on this round!", 
+            "Who needs luck when you have cold, hard logic?", "Oops, did I just flinch?", 
+            "One more round won’t hurt… or will it?", "You spin me right round, baby!", 
+            "I'm feeling lucky! Oh wait, that’s your line!", "If I had a heart, it’d be racing!"
+        ];
+        let bullets;
+        let deathChance = 0;
+        let bulletsThisRound = 0;
+
+        function resetGame() {
+            turn = 0;
+            chambers = Array(6).fill(false);
+            bullets = 0;
+            bulletsThisRound = 0;
+            deathChance = 0;
+            document.getElementById("trigger-btn").disabled = false;
+            document.getElementById("status").innerText = "Game reset. Your turn!";
+            document.getElementById("gun").style.transform = "rotate(90deg)";
+            document.getElementById("chance-fill").style.width = "0%";
+            document.getElementById("bot-message").innerText = "";
+            document.getElementById("bullets").innerHTML = "";
+        }
+
+        function playGame() {
+            let gun = document.getElementById("gun");
+            deathChance += 5;
+            bulletsThisRound = 0;
+            document.getElementById("chance-fill").style.width = `${deathChance}%`;
+            let fired = Math.random() * 100 < deathChance;
+            
+            if (fired) {
+                document.getElementById("status").innerText = (turn % 2 === 0) ? "You lost! 💀" : "Bot lost! 🎉";
+                document.getElementById("bot-message").innerText = (turn % 2 === 0) ? botMessages[Math.floor(Math.random() * botMessages.length)] : "";
+                document.getElementById("trigger-btn").disabled = true;
+            } else {
+                document.getElementById("status").innerText = (turn % 2 === 0) ? "Click again... You're safe!" : "Bot is safe... Your turn!";
+                gun.style.transform = `rotate(${turn % 2 === 0 ? 90 : -90}deg)`;
+                if (turn % 2 !== 0) {
+                    document.getElementById("bot-message").innerText = botMessages[Math.floor(Math.random() * botMessages.length)];
+                }
+                turn++;
+            }
+            if (turn % 2 === 0 && turn % 4 === 0) {
+                addBullet();
+                document.getElementById("bot-message").innerText = "Let's Speed Things up a notch eh?";
+            }
+        }
+
+        function addBullet() {
+            if (bullets < 6 && bulletsThisRound < 1) {
+                chambers[bullets] = true;
+                bullets++;
+                bulletsThisRound++;
+                let bulletImg = document.createElement("img");
+                bulletImg.classList.add("bullet");
+                bulletImg.src = "https://www.freeiconspng.com/uploads/bullet-png-12.png";
+                document.getElementById("bullets").appendChild(bulletImg);
+                deathChance += 5; // Increase death chance with each added bullet
+            }
+        }
+
+        resetGame();
+    </script>
+</body>
+</html>
